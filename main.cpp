@@ -63,10 +63,27 @@ class users
 private:
     string username;
     int password;
+    linked_list<string> posts;
+    graph<users> followings;
+    graph<users> followers;
 public:
-
-    void register_account()
+    users()
     {}
+    void sign_up()
+    {}
+    void delete_account()
+    {}
+    void watch_profile()
+    {}
+    void give_relative_accounts()
+    {}
+    void search_user()
+    {}
+    void add_new_post()
+    {}
+    void delete_post()
+    {}
+
     string get_data_from_file(string location)
     {
         ifstream input_file(location);
@@ -94,3 +111,4 @@ int main(void)
 
     return 0;
 }
+//upload
