@@ -3,23 +3,53 @@
 #include <string>
 using namespace std;
 
+
+
 template <typename T>
 class linked_list
 {
 private:
-    T data;
+    T* data;
+    T post;
     int id;
     linked_list *next, *prev;
 
 public:
-    linked_list(int id_in, T data_in)
+    linked_list(int id_in, T* data_in) //for users
     {
         data = data_in;
         id = id_in;
         next = NULL;
         prev = NULL;
     }
-    void add_node(linked_list *&start_ll, T data_in)
+    linked_list(int id_in, string data_in) //for posts
+    {
+        data=data_in;
+        id=id_in;
+        next=NULL;
+        prev=NULL;
+    }
+    void add_node(linked_list *&start_ll, string data_in) //for posts
+    {
+        if (start_ll == NULL)
+        {
+            start_ll = new linked_list(0, data_in);
+            return;
+        }
+        else
+        {
+            linked_list *tmp_ll = start_ll;
+            while (tmp_ll->next != NULL)
+            {
+                tmp_ll = tmp_ll->next;
+            }
+            tmp_ll->next = new linked_list(tmp_ll->id + 1, data_in);
+            tmp_ll->next->prev = tmp_ll;
+            return;
+        }
+
+    }
+    void add_node(linked_list *&start_ll, T* data_in) //for users
     {
         if (start_ll == NULL)
         {
@@ -38,6 +68,141 @@ public:
             return;
         }
     }
+    void show(linked_list* start_ll) //for posts
+    {
+        while(start_ll!=NULL)
+        {
+            cout<<"id: "<<start_ll->id<<"\tpost: "<<start_ll->post<<endl;
+            start_ll=start_ll->next;
+        }
+        cout<<endl;
+    }
+    void show(linked_list* start_ll, string username) //for users
+    {}
+    void edit_node(linked_list*& start_ll, int id_in, string post_in) //for posts
+    {
+        linked_list* tmp_ll=start_ll;
+        while(tmp_ll!=NULL && tmp_ll->id!=id_in)
+        {
+            tmp_ll=tmp_ll;
+        }
+        if(tmp_ll==NULL)
+        {
+            cout<<"error! invalid id\n";
+            return;
+        }
+        else
+        {
+            tmp_ll->post=post_in;
+            cout<<"done\n";
+            return;
+        }
+    }
+    void delete_node(linked_list*& start_ll, int id_in) //for posts
+    {
+        linked_list* tmp_ll=start_ll;
+        while(tmp_ll!=NULL && tmp_ll->id!=id_in)
+        {
+            tmp_ll=tmp_ll->next;
+        }
+        if(tmp_ll==NULL)
+        {
+            cout<<"error! invalid id\n";
+            return;
+        }
+        else 
+        {
+            if(tmp_ll->prev==NULL)
+            {
+                start_ll=tmp_ll->next;
+                start_ll->prev=NULL;
+                delete tmp_ll;
+            }
+            else if(tmp_ll->next==NULL)
+            {
+                tmp_ll->prev->next=NULL;
+                delete tmp_ll;
+            }
+            else 
+            {
+                tmp_ll->prev->next=tmp_ll->next;
+                tmp_ll->next->prev=tmp_ll->prev;
+            }
+        }
+    }
+    void delete_node(linked_list*& start_ll, string username_in) //for users
+    {
+        linked_list* tmp_ll=start_ll;
+        while(tmp_ll!=NULL && tmp_ll->data->get_username(tmp_ll->data)!=username_in)
+        {
+            tmp_ll=tmp_ll->next;
+        }
+        if(tmp_ll==NULL)
+        {
+            cout<<"error! invalid username\n";
+            return;
+        }
+        else 
+        {
+            if(tmp_ll->prev==NULL)
+            {
+                start_ll=tmp_ll->next;
+                start_ll->prev=NULL;
+                delete tmp_ll;
+            }
+            else if(tmp_ll->next==NULL)
+            {
+                tmp_ll->prev->next=NULL;
+                delete tmp_ll;
+            }
+            else 
+            {
+                tmp_ll->prev->next=tmp_ll->next;
+                tmp_ll->next->prev=tmp_ll->prev;
+            }
+        }
+    }
+    T* get_node(linked_list*& start_ll, string username_in) //for users
+    {
+        linked_list* tmp_ll=start_ll;
+        while(tmp_ll!=NULL  && tmp_ll->data->get_username(tmp_ll->data)!=username_in)
+            tmp_ll=tmp_ll->next;
+        if(tmp_ll==NULL)
+        {
+            cout<<"error! no such user\n";
+            return NULL;
+        }
+        return tmp_ll->data;
+    }
+    T* get_order_node(linked_list*& start_ll, int counter)
+    {
+        linked_list* tmp_ll=start_ll;
+        for(int i=0; i<counter; i++)    
+            start_ll=start_ll->next;
+        return start_ll->data;
+    }
+    int count_mem(linked_list* start_ll)
+    {
+        int counter=0; 
+        while(start_ll!=NULL)
+        {
+            counter++;
+            start_ll=start_ll->next;
+        }
+        return counter;
+    }
+    int search(linked_list* start_ll, string username_in)
+    {
+        while(start_ll!=NULL && start_ll->data->username!=username_in)
+        {
+            start_ll=start_ll->next;
+        }
+        if(start_ll==NULL)
+            return 0;
+        else 
+            return 1;
+    }
+
 };
 
 template<typename T>
