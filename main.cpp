@@ -53,7 +53,7 @@ class pq
 {
 private:
     pq_objects<T>* value;
-    pq* next, prev;
+    pq* next, *prev;
 public:
     pq(pq_objects*& value_in)
     {
@@ -61,7 +61,7 @@ public:
         next=NULL;
         prev=NULL; 
     }
-    void add_node(pq*& start_pq, double key_in, T value_in)
+    void add_node(pq*& start_pq, double key_in, T* value_in)
     {
         pq_objects<T>* tmp_ob;
         tmp_ob->key=key_in;
@@ -97,30 +97,73 @@ public:
             }
         }
     }
-    pq* get_next(pq*& start_pq)
+    T* get_node(pq*& start)
     {
-        return start_pq->next;
+        if(start==NULL)
+            return NULL;
+        pq* tmp_pq=start;
+        start=start->next;
+        if(start!=NULL)
+        {
+            start->prev=NULL;
+        }
+        return tmp_pq->value;
     }
-    pq* get_prev(pq*& start_pq)
-    {
-        return start_pq->prev;
-    }
-
 };
 
 template <typename T>
 class graph // this ADT is for storing relations of users.
 {
 private:
-    linked_list<T> *sart_ll;
+    linked_list<T> *start_ll;
 
 public:
     graph()
     {
+        start_ll=NULL;
     }
-    void add_node()
+    void add_node(graph*& start_g, T*&start_ll_in)
     {
+        start_g->start_ll->add_node(start_g->start_ll, start_ll_in);
     }
+    void show(graph*& start_g)
+    {
+        start_g->start_ll->show(start_g->start_ll);
+    }
+    void delete_node(graph*& start_g, string username_in)
+    {
+        start_g->start_ll->delete_node(start_g->start_ll, username_in);
+    }
+    int search(graph*& start_g, string username_in)
+    {
+        return start_g->start_ll->search(start_g->start_ll, username_in);
+    }
+    int count_mem(graph*& start_g)
+    {
+        return start_g->start_ll->count_mem(start_g->start_ll);
+    }
+    int count_similars(graph*& start_g1, graph*& start_g2)
+    {
+        int mem_count_g1=start_g1->count_mem(start_g1);
+        int mem_count_g2=start_g2->count_mem(start_g2);
+        int sim_count=0;
+        for(int i=0; i<mem_count_g1; i++)
+        {
+            for(int j=0; j<mem_count_g2; j++)
+            {
+                T* tmp_user=start_g2->start_ll->get_order_node(start_g2->start_ll, j);
+                string tmp_username=tmp_user->get_username(tmp_user);
+                if(start_g1->search(start_g1, tmp_username))
+                    sim_count++;
+            }
+        }
+        return sim_count;
+    }
+    T* get_node(graph*& start_g, string username_in)
+    {
+        return start_g->start_ll->get_node(start_g->start_ll, username_in);
+    }
+
 };
 
 class users
@@ -185,6 +228,10 @@ public:
             tmp_users->next->prev = tmp_users;
             return;
         }
+    }
+    string get_username(users*& start)
+    {
+        return start->username;
     }
     void main_operations(users *&start)
     {
@@ -268,7 +315,7 @@ public:
             else if(operation==3)
                 {cur_user->watch_profile(cur_user);}
             else if(operation==4)
-                {}
+                {cur_user->suggest_others_users(start, cur_user);}
             else if(operation==5)
                 {start->search_user(start);}
             else if(operation==6)
@@ -407,9 +454,9 @@ public:
         {
             if(tmp_user!=cur_user)
             {
-                if(!cur_user->followings->search(cur_user->followings, tmp_user))
+                if(!cur_user->followings->search(cur_user->followings, tmp_user->username))
                 {
-                    if(!cur_user->followers->search(cur_user->followers, tmp_user))
+                    if(!cur_user->followers->search(cur_user->followers, tmp_user->username))
                     {
                         double key_index=-1;       //this is the final key.
                         double total_distinct_followers=0;
@@ -424,6 +471,19 @@ public:
                 }
             }
             tmp_user=tmp_user->next;
+        }
+
+        for(int i=0; i<6; i++)
+        {
+            users* tmp_user3=start_pq->get_node(start_pq);
+            cout<<"suggested user "<<i<<":"<<tmp_user3->username<<endl;
+            cout<<"do you want to follow? "<<"0-no  1-yes ";
+            int operation=-1;
+            cin>>operation;
+            if(operation==0)
+                continue;
+            else if(operation==1)
+                cur_user->follow(cur_user, tmp_user3);
         }
     }
     void search_user(users*& start, users*& cur_user)
@@ -482,6 +542,10 @@ public:
     {
         cur_user->followings->add_node(cur_user->followings, tmp_user);
     }
+    void unfollow(users*& cur_user, string username_in)
+    {
+        cur_user->followings->delete_node(cur_user->followings, username_in);
+    }
     void unfollow(users*& cur_user)
     {   
         cout<<"followings: "<<endl;
@@ -490,6 +554,10 @@ public:
         string username_in;
         getline(cin, username_in);
         cur_user->followings->delete_node(cur_user->followings, username_in);
+    }
+    void remove_follower(users*& cur_user, string username_in)
+    {
+        cur_user->followers->delete_node(cur_user->followers, username_in);
     }
     void remove_follower(users*& cur_user)
     {   
@@ -501,6 +569,8 @@ public:
         cur_user->followers->delete_node(cur_user->followers, username_in);
     }
 
+
+    //optional for testing.
     string get_data_from_file(string location)
     {
         ifstream input_file(location);
