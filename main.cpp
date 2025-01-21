@@ -40,6 +40,74 @@ public:
     }
 };
 
+template<typename T>
+class pq_objects
+{
+public:    
+    double key;
+    T value;
+};
+
+template <typename T>
+class pq
+{
+private:
+    pq_objects<T>* value;
+    pq* next, prev;
+public:
+    pq(pq_objects*& value_in)
+    {
+        value=value_in;
+        next=NULL;
+        prev=NULL; 
+    }
+    void add_node(pq*& start_pq, double key_in, T value_in)
+    {
+        pq_objects<T>* tmp_ob;
+        tmp_ob->key=key_in;
+        tmp_ob->value=value_in;
+        
+        if(start_pq==NULL)
+        {
+            start_pq=new pq(tmp_ob);
+            return;
+        }
+        else
+        {
+            pq* tmp_pq=start_pq;
+            while((tmp_pq->next!=NULL)   &&   (tmp_pq->next->value->key<=tmp_ob->key))
+            {
+                tmp_pq=tmp_pq->next;
+            }
+
+            if(tmp_pq->next==NULL)
+            {
+                tmp_pq->next=new pq(tmp_ob);
+                tmp_pq->next->prev=tmp_pq;
+                return;
+            }
+            else
+            {
+                pq* tmp_pq2=new pq(tmp_ob);
+                tmp_pq2->prev=tmp_pq;
+                tmp_pq2->next=tmp_pq->next;
+                tmp_pq->next=tmp_pq2;
+                tmp_pq2->next->prev=tmp_pq2;
+                return;
+            }
+        }
+    }
+    pq* get_next(pq*& start_pq)
+    {
+        return start_pq->next;
+    }
+    pq* get_prev(pq*& start_pq)
+    {
+        return start_pq->prev;
+    }
+
+};
+
 template <typename T>
 class graph // this ADT is for storing relations of users.
 {
@@ -334,7 +402,7 @@ public:
     void suggest_others_users(users*& start, users*& cur_user)
     {
         users* tmp_user=start;
-        users** users_list=new users*[6];
+        pq<users>* start_pq=NULL;
         while(tmp_user!=NULL)
         {
             if(tmp_user!=cur_user)
@@ -343,7 +411,15 @@ public:
                 {
                     if(!cur_user->followers->search(cur_user->followers, tmp_user))
                     {
-                        
+                        double key_index=-1;       //this is the final key.
+                        double total_distinct_followers=0;
+                        double same_persons=0;
+                        same_persons+=cur_user->followers->count_similars(cur_user->followers, tmp_user->followers);
+                        total_distinct_followers+=cur_user->followers->count_mem(cur_user->followers);
+                        total_distinct_followers+=tmp_user->followers->count_mem(tmp_user->followers);
+                        total_distinct_followers-=2*same_persons;
+                        key_index=total_distinct_followers/same_persons;
+                        start_pq->add_node(start_pq, key_index, tmp_user);
                     }
                 }
             }
