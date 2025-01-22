@@ -156,19 +156,7 @@ public:
         }
         return tmp_ll->data;
     }
-    /**/ T *get_order_node(linked_list *&start_ll, int counter)
-    {
-        linked_list *tmp_ll = start_ll;
-        for (int i = 0; i < counter; i++)
-            {
-                cout<<"username: "<<start_ll->data->get_username(start_ll->data)<<endl;
-                start_ll = start_ll->next;
-            }
-        if(start_ll==NULL)
-            cout<<"it is null...\n";
-        return start_ll->data;
-    }
-    int sim_exam(linked_list* start1, linked_list* start2)
+    /**/ int sim_exam(linked_list* start1, linked_list* start2)
     {
         if(start1->count_mem(start1)==0)
             {cout<<"it is NULL\n";
@@ -203,7 +191,7 @@ public:
         }
         return counter;
     }
-    int search(linked_list *start_ll, string username_in)
+    /**/ int search(linked_list *start_ll, string username_in)
     {
         while (start_ll != NULL && start_ll->data->get_username(start_ll->data) != username_in)
         {
@@ -862,26 +850,10 @@ public:
         tmp_user->followings->delete_node(tmp_user->followings, cur_user->username);
         cur_user->followers->delete_node(cur_user->followers, username_in);
     }
-
-    // optional for testing.
-    string get_data_from_file(string location)
-    {
-        ifstream input_file(location);
-        if (!input_file)
-        {
-            cout << "error! invalid location for text file.\n";
-            return NULL;
-        }
-        else
-        {
-            string line;
-            getline(input_file, line);
-            input_file.close();
-            return line;
-        }
-    }
 };
 int users::total_users = 0;
+
+//test
 
 int main(void)
 {
